@@ -123,7 +123,7 @@ public class Game extends JPanel implements Runnable, KeyListener {
 		head = new Entity(100);
 		head.setPosition(1300 / 2, 1300 / 2);
 		snake.add(head);
-		for(int i = 0; i < 3; i++) {
+		for(int i = 1; i < 3; i++) {
 			Entity e = new Entity(100);
 			e.setPosition(head.getX() + (i * 30), head.getY());
 			snake.add(e);
@@ -151,6 +151,13 @@ public class Game extends JPanel implements Runnable, KeyListener {
 
 	private void update() {
 		// TODO Auto-generated method stub
+		if(gameOver) {
+			dx = 0;
+			dy = 0;
+			if(start) {
+				setUplevel();
+			}
+		}
 		if(up && dy == 0) {
 			dy = -30;
 			dx = 0;
@@ -163,7 +170,7 @@ public class Game extends JPanel implements Runnable, KeyListener {
 			dy = 0;
 			dx = -30;
 		}
-		if(right && dx == 0) {
+		if(right && dx == 0 && dy != 0) {
 			dy = 0;
 			dx = 30;
 		}
@@ -172,6 +179,13 @@ public class Game extends JPanel implements Runnable, KeyListener {
 			snake.get(i).setPosition(snake.get(i-1).getX(), snake.get(i-1).getY());
 		}
 		head.move(dx, dy);
+		}
+		
+		for(Entity e : snake) {
+			if(e.isCollision(head)) {
+				gameOver = true;
+				break;
+			}
 		}
 		
 		if(apple.isCollision(head)) {
@@ -187,16 +201,16 @@ public class Game extends JPanel implements Runnable, KeyListener {
 		
 		
 		if(head.getX() < 0) {
-			head.setX(1300);
+			gameOver = true;
 		}
 		if(head.getY() < 0) {
-			head.setY(1300);
+			gameOver = true;
 		}
 		if(head.getX() > 1300) {
-			head.setX(0);
+			gameOver = true;
 		}
 		if(head.getY() > 1300) {
-			head.setY(0);
+			gameOver = true;
 		}
 	}
 	public void render(Graphics2D g2) {
@@ -208,8 +222,26 @@ public class Game extends JPanel implements Runnable, KeyListener {
 		g2.setColor(Color.RED);
 		apple.render(g2);
 		
+		if(gameOver) {
+				g2.setColor(Color.BLACK);
+				g2.fillRect(apple.getX(), apple.getY(), 30, 30);
+				for(Entity e : snake) {
+					g2.fillRect(e.getX(), e.getY(), 30, 30);
+				}
+				
+				Font f = new Font("TimesRoman", Font.BOLD, 100);
+				Font f2 = new Font("TimesRoman", Font.BOLD, 50);
+				g2.setFont(f);
+				g2.setColor(Color.WHITE);
+				g2.drawString("GAME OVER", 350, 650);
+				g2.setFont(f2);
+				g2.drawString("Press space to start over", 400, 750);
+		}
+		
 		g2.setColor(Color.WHITE);
-		g2.drawString("Score: " + score, 10, 10);
+		Font f = new Font("TimesRoman", Font.PLAIN, 50);
+		g2.setFont(f);
+		g2.drawString("Score: " + score, 50, 50);
 	}
 
 	private void init() {
