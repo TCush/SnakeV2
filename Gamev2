@@ -1,3 +1,10 @@
+/*
+ * Names: Timothy Cushman and Max Laval
+ * Date: 6/7/18
+ * Project: To recreate the classic Snake Game
+ * Inputs: Arrow keys to controll the snake
+ * Output: The snake moving in the direction indicated by the arrow keys
+ */
 package game;
 
 import java.awt.Color;
