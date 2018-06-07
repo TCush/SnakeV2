@@ -1,0 +1,273 @@
+package game;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import javax.swing.JPanel;
+
+public class Game extends JPanel implements Runnable, KeyListener 
+{
+
+	private Thread thread;
+	private boolean running;
+	private long targetTime;
+	private Graphics2D g2;
+	private BufferedImage image;
+	private boolean gameOver;
+	private BodyPart head, apple;
+	private ArrayList<BodyPart> snake;
+	private int score;
+	private int dx, dy;
+	private boolean up, down, right, left, start;
+	public Game() 
+	{
+		setPreferredSize(new Dimension(1300, 1300));
+		setFocusable(true);
+		requestFocus();
+		addKeyListener(this);
+	}
+	
+	private void setUpGame()
+	{
+		snake = new ArrayList<BodyPart>();
+		head = new BodyPart(100);
+		head.setPosition(1300 / 2, 1300 / 2);
+		snake.add(head);
+		for(int i = 1; i < 3; i++) {
+			BodyPart bod = new BodyPart(100);
+			bod.setPosition(head.getX() + (i * 30), head.getY());
+			snake.add(bod);
+		}
+		apple = new BodyPart(100);
+		placeApple();
+		score = 0;
+		gameOver = false;
+	}
+	
+	public void placeApple()
+	{
+		int x = (int)(Math.random() * (1200));
+		int y = (int)(Math.random() * (1200));
+		x = x - (x % 100);
+		y = y - (y % 100);
+		apple.setPosition(x, y);
+	}
+		
+	private void setFrameRate(int fps)
+	{
+		targetTime = 1000 / fps;
+	}
+	
+	public void addNotify() 
+	{
+		super.addNotify();
+		thread = new Thread(this);
+		thread.start();
+	}
+	
+	public void keyPressed(KeyEvent e) 
+	{
+		int k = e.getKeyCode();
+		
+		if(k == KeyEvent.VK_UP) {
+			up = true;
+		}
+		if(k == KeyEvent.VK_DOWN) {
+			down = true;
+		}
+		if(k == KeyEvent.VK_RIGHT) {
+			right = true;
+		}
+		if(k == KeyEvent.VK_LEFT) {
+			left = true;
+		}
+		if(k == KeyEvent.VK_SPACE) {
+			start = true;
+		}
+	}
+
+	public void keyReleased(KeyEvent e) 
+	{
+		int k = e.getKeyCode();
+				
+		if(k == KeyEvent.VK_UP) {
+			up = false;
+		}
+		if(k == KeyEvent.VK_DOWN) {
+			down = false;
+		}
+		if(k == KeyEvent.VK_RIGHT) {
+			right = false;
+		}
+		if(k == KeyEvent.VK_LEFT) {
+			left = false;
+		}
+		if(k == KeyEvent.VK_SPACE) {
+			start = false;
+		}
+	}
+
+	public void keyTyped(KeyEvent e) {}
+
+	public void run() 
+	{
+		if(running) return;
+		inGame();
+		long startTime;
+		long elapsed;
+		long wait;
+		
+		while(running) 
+		{
+			startTime = System.nanoTime();
+			
+			update();
+			requestRender();
+			
+			elapsed = System.nanoTime() - startTime;
+			wait = targetTime - elapsed / 1000000;
+			if(wait > 0) {
+				try {
+					Thread.sleep(wait);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	private void requestRender()
+	{
+		render(g2);
+		Graphics g = getGraphics();
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
+	}
+
+	private void update() 
+	{
+		if(gameOver) {
+			dx = 0;
+			dy = 0;
+			if(start) {
+				setUpGame();
+			}
+		}
+		if(up && dy == 0)
+		{
+			dy = -30;
+			dx = 0;
+		}
+		if(down && dy == 0) 
+		{
+			dy = 30;
+			dx = 0;
+		}
+		if(left && dx == 0) 
+		{
+			dy = 0;
+			dx = -30;
+		}
+		if(right && dx == 0 && dy != 0) 
+		{
+			dy = 0;
+			dx = 30;
+		}
+		if(dx != 0 || dy != 0) 
+		{	
+			for(int i = snake.size() - 1; i > 0; i--) 
+			{
+				snake.get(i).setPosition(snake.get(i-1).getX(), snake.get(i-1).getY());
+			}
+			head.moveSnake(dx, dy);
+		}
+		
+		for(BodyPart bod : snake) 
+		{
+			if(bod.testColision(head)) 
+			{
+				gameOver = true;
+				break;
+			}
+		}
+		
+		if(apple.testColision(head)) 
+		{
+			score += 3;
+			placeApple();
+			
+			for(int i = 0; i < 3; i ++)
+			{
+				BodyPart bod = new BodyPart(100);
+				bod.setPosition(-100, - 100);
+				snake.add(bod);
+			}
+		}
+		if(head.getX() < 0) 
+		{
+			gameOver = true;
+		}
+		if(head.getY() < 0) 
+		{
+			gameOver = true;
+		}
+		if(head.getX() > 1300)
+		{
+			gameOver = true;
+		}
+		if(head.getY() > 1300)
+		{
+			gameOver = true;
+		}
+	}
+	public void render(Graphics2D g2) 
+	{
+		g2.clearRect(0, 0, 1300, 1300);
+		g2.setColor(Color.GREEN);
+		for(BodyPart bod : snake)
+		{
+			bod.render(g2);
+		}
+		g2.setColor(Color.RED);
+		apple.render(g2);
+		
+		if(gameOver)
+		{
+				g2.setColor(Color.BLACK);
+				g2.fillRect(apple.getX(), apple.getY(), 30, 30);
+				for(BodyPart bod : snake)
+				{
+					g2.fillRect(bod.getX(), bod.getY(), 30, 30);
+				}
+				
+				Font f = new Font("TimesRoman", Font.BOLD, 100);
+				Font f2 = new Font("TimesRoman", Font.BOLD, 50);
+				g2.setFont(f);
+				g2.setColor(Color.WHITE);
+				g2.drawString("GAME OVER", 350, 650);
+				g2.setFont(f2);
+				g2.drawString("Press space to start over", 400, 750);
+		}
+		
+		g2.setColor(Color.WHITE);
+		Font f = new Font("TimesRoman", Font.PLAIN, 50);
+		g2.setFont(f);
+		g2.drawString("Score: " + score, 50, 50);
+	}
+
+	private void inGame()
+	{
+		image = new BufferedImage(1300, 1300, BufferedImage.TYPE_INT_ARGB);
+		g2 = image.createGraphics();
+		running = true;
+		setUpGame();
+		setFrameRate(10);
+	}
+
+}
