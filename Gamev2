@@ -2,7 +2,7 @@
  * Names: Timothy Cushman and Max Laval
  * Date: 6/7/18
  * Project: To recreate the classic Snake Game
- * Inputs: Arrow keys to controll the snake
+ * Inputs: Arrow keys to control the snake
  * Output: The snake moving in the direction indicated by the arrow keys
  */
 package game;
@@ -32,6 +32,8 @@ public class Game extends JPanel implements Runnable, KeyListener
 	private int score;
 	private int dx, dy;
 	private boolean up, down, right, left, start;
+	
+	//Constructor for the snake game that sets the dimensions of the board and impliments the keyListener to allow for arrow key imputs. 
 	public Game() 
 	{
 		setPreferredSize(new Dimension(1300, 1300));
@@ -40,6 +42,19 @@ public class Game extends JPanel implements Runnable, KeyListener
 		addKeyListener(this);
 	}
 	
+	//Calls the setUpGame methood and sets the parameter for the frame rate
+	private void inGame()
+	{
+		image = new BufferedImage(1300, 1300, BufferedImage.TYPE_INT_ARGB);
+		g2 = image.createGraphics();
+		running = true;
+		setUpGame();
+		setFrameRate(10);
+	}
+	
+	/*Sets up the game by creating a new snake with a new array of size 2 and a head. It also resets 
+	*the score and calls for a new apple to be placed. 
+	*/
 	private void setUpGame()
 	{
 		snake = new ArrayList<BodyPart>();
@@ -57,6 +72,7 @@ public class Game extends JPanel implements Runnable, KeyListener
 		gameOver = false;
 	}
 	
+	//Randomly places an apple on the board
 	public void placeApple()
 	{
 		int x = (int)(Math.random() * (1200));
@@ -71,6 +87,7 @@ public class Game extends JPanel implements Runnable, KeyListener
 		targetTime = 1000 / fps;
 	}
 	
+	//Makes the components visible allowing for graphics to show
 	public void addNotify() 
 	{
 		super.addNotify();
@@ -78,6 +95,9 @@ public class Game extends JPanel implements Runnable, KeyListener
 		thread.start();
 	}
 	
+	/*Checks to see if an arrow key was pressed to indicated a wanted movement of the snake. It
+	*also checks to see if the spacebar was pressed to indicate wanting to start a new game.
+	*/
 	public void keyPressed(KeyEvent e) 
 	{
 		int k = e.getKeyCode();
@@ -98,7 +118,9 @@ public class Game extends JPanel implements Runnable, KeyListener
 			start = true;
 		}
 	}
-
+	/*Checks to see if an arrow key was released to reset all movements to false making it so the snake does not keep turning.
+	*It also checks to see if the spacebar was release to stop it constantly starting another game.
+	*/
 	public void keyReleased(KeyEvent e) 
 	{
 		int k = e.getKeyCode();
@@ -120,8 +142,10 @@ public class Game extends JPanel implements Runnable, KeyListener
 		}
 	}
 
+	//The keyType methood needs to be shown when KeyListener extends a program, but was not required to be used in our program.
 	public void keyTyped(KeyEvent e) {}
 
+	//Starts the game and sets up the timers for the movemnets of the pieces
 	public void run() 
 	{
 		if(running) return;
@@ -157,6 +181,7 @@ public class Game extends JPanel implements Runnable, KeyListener
 		g.dispose();
 	}
 
+	//Becuase the cordonates of the squares are constantly moving, the update methood helps create the moving effect. 
 	private void update() 
 	{
 		if(gameOver) {
@@ -194,7 +219,7 @@ public class Game extends JPanel implements Runnable, KeyListener
 			}
 			head.moveSnake(dx, dy);
 		}
-		
+		//Checks to see if any of the head has collided with any of the body parts and ends the game if nicessary. 
 		for(BodyPart bod : snake) 
 		{
 			if(bod.testColision(head)) 
@@ -203,7 +228,7 @@ public class Game extends JPanel implements Runnable, KeyListener
 				break;
 			}
 		}
-		
+		//This increases the snake's length when a colision with an apple is detected. 
 		if(apple.testColision(head)) 
 		{
 			score += 3;
@@ -216,6 +241,7 @@ public class Game extends JPanel implements Runnable, KeyListener
 				snake.add(bod);
 			}
 		}
+		//these next four if statments check to see if the snake head has collided with any of the four borders which would end the game. 
 		if(head.getX() < 0) 
 		{
 			gameOver = true;
@@ -233,6 +259,8 @@ public class Game extends JPanel implements Runnable, KeyListener
 			gameOver = true;
 		}
 	}
+	
+	//Creates the color of the snake and the apples along with writing the score and game over parts of the game. 
 	public void render(Graphics2D g2) 
 	{
 		g2.clearRect(0, 0, 1300, 1300);
@@ -244,6 +272,7 @@ public class Game extends JPanel implements Runnable, KeyListener
 		g2.setColor(Color.RED);
 		apple.render(g2);
 		
+		//If a game over is needed this methood shows the score and the words "GAME OVER" and how to start a new game
 		if(gameOver)
 		{
 				g2.setColor(Color.BLACK);
@@ -268,13 +297,6 @@ public class Game extends JPanel implements Runnable, KeyListener
 		g2.drawString("Score: " + score, 50, 50);
 	}
 
-	private void inGame()
-	{
-		image = new BufferedImage(1300, 1300, BufferedImage.TYPE_INT_ARGB);
-		g2 = image.createGraphics();
-		running = true;
-		setUpGame();
-		setFrameRate(10);
-	}
+	
 
 }
