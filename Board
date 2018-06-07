@@ -2,7 +2,7 @@
  * Names: Timothy Cushman and Max Laval
  * Date: 6/7/18
  * Project: To recreate the classic Snake Game
- * Inputs: Arrow keys to controll the snake
+ * Inputs: Arrow keys to control the snake
  * Output: The snake moving in the direction indicated by the arrow keys
  */
 package game;
@@ -13,7 +13,6 @@ import javax.swing.JFrame;
 
 public class Board 
 {
-
 	public static void main(String[] args) 
 	{
 		JFrame frame = new JFrame("Snake");
