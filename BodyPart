@@ -2,7 +2,7 @@
  * Names: Timothy Cushman and Max Laval
  * Date: 6/7/18
  * Project: To recreate the classic Snake Game
- * Inputs: Arrow keys to controll the snake
+ * Inputs: Arrow keys to control the snake
  * Output: The snake moving in the direction indicated by the arrow keys
  */
 package game;
@@ -40,24 +40,27 @@ public class BodyPart
 		x = newX;
 		y = newY;
 	}
-	
+	//Increase the x or y cordinates of the snake to move it according to the key that was pressesd. 
 	public void moveSnake(int dx, int dy) 
 	{
 		x += dx;
 		y += dy;
 	}
 	
+	//Returns the line that is the exterior of each body part. This will be used to test for colisions
 	public Rectangle getBoundaries() 
 	{
 		return new Rectangle(x, y, size, size);
 	}
 	
+	//Tests to see if the head of the snake runs into any other part of the snake which would end the game.
 	public boolean testColision(BodyPart b) 
 	{
 		if(b == this) return false;
 		return getBoundaries().intersects(b.getBoundaries());
 	}
 	
+	//creates the rectangles that are the body parts of the snake or the apples. 
 	public void render(Graphics2D g2) 
 	{
 		g2.fillRect(x , y , size, size);
